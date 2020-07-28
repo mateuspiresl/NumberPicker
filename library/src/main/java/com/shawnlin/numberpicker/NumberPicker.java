@@ -630,6 +630,21 @@ public class NumberPicker extends LinearLayout {
     private int mSidePadding = 0;
 
     /**
+     * The disabled top value delimiter.
+     */
+    private int mDisabledTopValue = Integer.MIN_VALUE;
+
+    /**
+     * The disabled bottom value delimiter.
+     */
+    private int mDisabledBottomValue = Integer.MAX_VALUE;
+
+    /**
+     * The color of the disabled text.
+     */
+    private int mDisabledTextColor = DEFAULT_TEXT_COLOR;
+
+    /**
      * Interface to listen for changes of the current value.
      */
     public interface OnValueChangeListener {
@@ -811,6 +826,12 @@ public class NumberPicker extends LinearLayout {
         mAlign = attributes.getInt(R.styleable.NumberPicker_np_align, mAlign);
         mSidePadding = attributes.getDimensionPixelSize(
                 R.styleable.NumberPicker_np_sidePadding, mSidePadding);
+        mDisabledTopValue = attributes.getInt(R.styleable.NumberPicker_np_disabledTopIndex,
+                mDisabledTopValue);
+        mDisabledBottomValue = attributes.getInt(R.styleable.NumberPicker_np_disabledBottomIndex,
+                mDisabledBottomValue);
+        mDisabledTextColor = attributes.getColor(R.styleable.NumberPicker_np_disabledTextColor,
+                mDisabledTextColor);
 
         // By default Linearlayout that we extend is not drawn. This is
         // its draw() method is not called but dispatchDraw() is called
@@ -1286,13 +1307,15 @@ public class NumberPicker extends LinearLayout {
             gap = mSelectorTextGapWidth;
         } else {
             if (isAscendingOrder()) {
+                final int minValue = Math.max(mMinValue, mDisabledTopValue + 1);
                 if (!mWrapSelectorWheel && y > 0
-                    && selectorIndices[mWheelMiddleItemIndex] <= mMinValue) {
+                    && selectorIndices[mWheelMiddleItemIndex] <= minValue) {
                     mCurrentScrollOffset = mInitialScrollOffset;
                     return;
                 }
+                final int maxValue = Math.min(mMaxValue, mDisabledBottomValue - 1);
                 if (!mWrapSelectorWheel && y < 0
-                    && selectorIndices[mWheelMiddleItemIndex] >= mMaxValue) {
+                    && selectorIndices[mWheelMiddleItemIndex] >= maxValue) {
                     mCurrentScrollOffset = mInitialScrollOffset;
                     return;
                 }
@@ -1798,6 +1821,11 @@ public class NumberPicker extends LinearLayout {
                 mSelectorWheelPaint.setColor(mTextColor);
                 mSelectorWheelPaint.setStrikeThruText(mTextStrikeThru);
                 mSelectorWheelPaint.setUnderlineText(mTextUnderline);
+
+                if (selectorIndices[i] <= mDisabledTopValue
+                        || selectorIndices[i] >= mDisabledBottomValue) {
+                    mSelectorWheelPaint.setColor(mDisabledTextColor);
+                }
             }
 
             int selectorIndex = selectorIndices[isAscendingOrder()

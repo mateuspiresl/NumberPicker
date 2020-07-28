@@ -57,5 +57,8 @@
             <enum name="left" value="2" />
         </attr>
         <attr name="np_sidePadding" format="dimension" />
+        <attr name="np_disabledTopIndex" format="integer" />
+        <attr name="np_disabledBottomIndex" format="integer" />
+        <attr name="np_disabledTextColor" format="color" />
     </declare-styleable>
 </resources>
