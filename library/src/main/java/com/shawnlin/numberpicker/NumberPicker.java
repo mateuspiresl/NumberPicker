@@ -1728,6 +1728,60 @@ public class NumberPicker extends LinearLayout {
         tryComputeMaxWidth();
     }
 
+    /**
+     * Gets the disabled top value.
+     *
+     * @return The disabled top value.
+     */
+    public int getDisabledTopValue() {
+        return mDisabledTopValue;
+    }
+
+    /**
+     * Sets the disabled top value. Every value equal or less will be disabled.
+     *
+     * @param disabledTopValue The top value inclusive.
+     */
+    public void setDisabledTopValue(int disabledTopValue) {
+        mDisabledTopValue = disabledTopValue;
+    }
+
+    /**
+     * Gets the disabled bottom value.
+     *
+     * @return The disabled bottom value.
+     */
+    public int getDisabledBottomValue() {
+        return mDisabledBottomValue;
+    }
+
+    /**
+     * Sets the disabled top value. Every value equal or greater will be disabled.
+     *
+     * @param disabledBottomValue The bottom value inclusive.
+     */
+    public void setDisabledBottomValue(int disabledBottomValue) {
+        mDisabledBottomValue = disabledBottomValue;
+    }
+
+    /**
+     * Gets the disabled text color.
+     *
+     * @return The disabled text color.
+     */
+    public int getDisabledTextColor() {
+        return mDisabledTextColor;
+    }
+
+    /**
+     * Sets the disabled text color. This color will be applied to the disabled values.
+     *
+     * @param disabledTextColor The disabled text color.
+     */
+    public void setDisabledTextColor(int disabledTextColor) {
+        mDisabledTextColor = disabledTextColor;
+    }
+
     private float getFadingEdgeStrength(boolean isHorizontalMode) {
         return isHorizontalMode && mFadingEdgeEnabled ? mFadingEdgeStrength : 0;
     }
