@@ -60,5 +60,7 @@
         <attr name="np_disabledTopIndex" format="integer" />
         <attr name="np_disabledBottomIndex" format="integer" />
         <attr name="np_disabledTextColor" format="color" />
+        <attr name="np_disabledSideText" format="string" />
+        <attr name="np_disabledSideTextSize" format="dimension" />
     </declare-styleable>
 </resources>

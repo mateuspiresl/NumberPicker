@@ -5,6 +5,7 @@ import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -645,6 +646,16 @@ public class NumberPicker extends LinearLayout {
     private int mDisabledTextColor = DEFAULT_TEXT_COLOR;
 
     /**
+     * The color of the disabled text.
+     */
+    private String mDisabledSideText = null;
+
+    /**
+     * The size of the disabled side text.
+     */
+    private float mDisabledSideTextSize = DEFAULT_TEXT_SIZE;
+
+    /**
      * Interface to listen for changes of the current value.
      */
     public interface OnValueChangeListener {
@@ -832,6 +843,9 @@ public class NumberPicker extends LinearLayout {
                 mDisabledBottomValue);
         mDisabledTextColor = attributes.getColor(R.styleable.NumberPicker_np_disabledTextColor,
                 mDisabledTextColor);
+        mDisabledSideText = attributes.getString(R.styleable.NumberPicker_np_disabledSideText);
+        mDisabledSideTextSize = attributes.getDimension(
+                R.styleable.NumberPicker_np_disabledSideTextSize, spToPx(mDisabledSideTextSize));
 
         // By default Linearlayout that we extend is not drawn. This is
         // its draw() method is not called but dispatchDraw() is called
@@ -1895,11 +1909,13 @@ public class NumberPicker extends LinearLayout {
             // with the new one.
             if ((showSelectorWheel && i != mWheelMiddleItemIndex)
                     || (i == mWheelMiddleItemIndex && mSelectedText.getVisibility() != VISIBLE)) {
-                float textY = y;
-                if (!isHorizontalMode()) {
-                    textY += getPaintCenterY(mSelectorWheelPaint.getFontMetrics());
+                drawText(scrollSelectorValue, x, y, mSelectorWheelPaint, canvas);
+
+                if (!isHorizontalMode() && (selectorIndices[i] <= mDisabledTopValue
+                        || selectorIndices[i] >= mDisabledBottomValue)) {
+                    mSelectorWheelPaint.setTextSize(mDisabledSideTextSize);
+                    drawSideText(mDisabledSideText, y, mSelectorWheelPaint, canvas);
                 }
-                drawText(scrollSelectorValue, x, textY, mSelectorWheelPaint, canvas);
             }
 
             if (isHorizontalMode()) {
@@ -1947,19 +1963,38 @@ public class NumberPicker extends LinearLayout {
     }
 
     private void drawText(String text, float x, float y, Paint paint, Canvas canvas) {
+        float adjustedY = isHorizontalMode()
+                ? y : y + getPaintCenterY(paint.getFontMetrics());
+
         if (text.contains("\n")) {
             final String[] lines = text.split("\n");
             final float height = Math.abs(paint.descent() + paint.ascent())
                     * mLineSpacingMultiplier;
             final float diff = (lines.length - 1) * height / 2;
-            y -= diff;
+            adjustedY -= diff;
             for (String line : lines) {
-                canvas.drawText(line, x, y, paint);
-                y += height;
+                canvas.drawText(line, x, adjustedY, paint);
+                adjustedY += height;
             }
         } else {
-            canvas.drawText(text, x, y, paint);
+            canvas.drawText(text, x, adjustedY, paint);
         }
+    }
+
+    private void drawSideText(String text, float y, Paint paint, Canvas canvas) {
+        if (mAlign != LEFT && mAlign != RIGHT) {
+            return;
+        }
+
+        final Rect bounds = new Rect();
+        paint.getTextBounds(text, 0, text.length(), bounds);
+
+        final int containerWidth = (int) getMaxTextSize();
+        final int width = bounds.width();
+        final int left = mAlign == LEFT
+                ? getRight() - containerWidth / 2 - width / 2 - mSidePadding
+                : getLeft() + containerWidth / 2 - width / 2 + mSidePadding;
+        drawText(text, left, y, paint, canvas);
     }
 
     @Override
