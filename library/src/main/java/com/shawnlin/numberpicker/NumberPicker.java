@@ -1989,11 +1989,9 @@ public class NumberPicker extends LinearLayout {
         final Rect bounds = new Rect();
         paint.getTextBounds(text, 0, text.length(), bounds);
 
-        final int containerWidth = (int) getMaxTextSize();
         final int width = bounds.width();
-        final int left = mAlign == LEFT
-                ? getRight() - containerWidth / 2 - width / 2 - mSidePadding
-                : getLeft() + containerWidth / 2 - width / 2 + mSidePadding;
+        final int left = (mAlign == LEFT ? getRight() - mSidePadding : getLeft() + mSidePadding)
+                - width / 2;
         drawText(text, left, y, paint, canvas);
     }
 
