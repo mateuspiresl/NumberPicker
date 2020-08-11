@@ -1306,27 +1306,25 @@ public class NumberPicker extends LinearLayout {
             mCurrentScrollOffset += x;
             gap = mSelectorTextGapWidth;
         } else {
+            final int currentValue = selectorIndices[mWheelMiddleItemIndex];
+
             if (isAscendingOrder()) {
                 final int minValue = Math.max(mMinValue, mDisabledTopValue + 1);
-                if (!mWrapSelectorWheel && y > 0
-                    && selectorIndices[mWheelMiddleItemIndex] <= minValue) {
+                if (!mWrapSelectorWheel && y > 0 && currentValue <= minValue) {
                     mCurrentScrollOffset = mInitialScrollOffset;
                     return;
                 }
                 final int maxValue = Math.min(mMaxValue, mDisabledBottomValue - 1);
-                if (!mWrapSelectorWheel && y < 0
-                    && selectorIndices[mWheelMiddleItemIndex] >= maxValue) {
+                if (!mWrapSelectorWheel && y < 0 && currentValue >= maxValue) {
                     mCurrentScrollOffset = mInitialScrollOffset;
                     return;
                 }
             } else {
-                if (!mWrapSelectorWheel && y > 0
-                    && selectorIndices[mWheelMiddleItemIndex] >= mMaxValue) {
+                if (!mWrapSelectorWheel && y > 0 && currentValue >= mMaxValue) {
                     mCurrentScrollOffset = mInitialScrollOffset;
                     return;
                 }
-                if (!mWrapSelectorWheel && y < 0
-                    && selectorIndices[mWheelMiddleItemIndex] <= mMinValue) {
+                if (!mWrapSelectorWheel && y < 0 && currentValue <= mMinValue) {
                     mCurrentScrollOffset = mInitialScrollOffset;
                     return;
                 }
@@ -1334,6 +1332,17 @@ public class NumberPicker extends LinearLayout {
 
             mCurrentScrollOffset += y;
             gap = mSelectorTextGapHeight;
+
+            // Prevents the scroll offset to go beyond the disabled values
+            if (y > 0 && mDisabledTopValue >= 0) {
+                final int maxOffset = mInitialScrollOffset
+                        + (mSelectorElementSize * (currentValue - mDisabledTopValue - 1));
+                mCurrentScrollOffset = Math.min(mCurrentScrollOffset, maxOffset);
+            } else if (y < 0 && mDisabledBottomValue < Integer.MAX_VALUE) {
+                final int minOffset = mInitialScrollOffset
+                        - (mSelectorElementSize * (mDisabledBottomValue - currentValue - 1));
+                mCurrentScrollOffset = Math.max(mCurrentScrollOffset, minOffset);
+            }
         }
 
         while (mCurrentScrollOffset - mInitialScrollOffset > gap) {
