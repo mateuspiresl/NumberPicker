@@ -656,6 +656,11 @@ public class NumberPicker extends LinearLayout {
     private float mDisabledSideTextSize = DEFAULT_TEXT_SIZE;
 
     /**
+     * The size of the disabled side text.
+     */
+    private ChangeType mChangeType = ChangeType.MOVE;
+
+    /**
      * Interface to listen for changes of the current value.
      */
     public interface OnValueChangeListener {
@@ -1091,6 +1096,7 @@ public class NumberPicker extends LinearLayout {
             mVelocityTracker = VelocityTracker.obtain();
         }
         mVelocityTracker.addMovement(event);
+        mChangeType = ChangeType.MOVE;
         int action = event.getAction() & MotionEvent.ACTION_MASK;
         switch (action) {
             case MotionEvent.ACTION_MOVE: {
@@ -1138,6 +1144,7 @@ public class NumberPicker extends LinearLayout {
                         int eventX = (int) event.getX();
                         int deltaMoveX = (int) Math.abs(eventX - mLastDownEventX);
                         if (deltaMoveX <= mTouchSlop) {
+                            mChangeType = ChangeType.PRESS;
                             int selectorIndexOffset = (eventX / mSelectorElementSize)
                                     - mWheelMiddleItemIndex;
                             if (selectorIndexOffset > 0) {
@@ -1161,14 +1168,13 @@ public class NumberPicker extends LinearLayout {
                         int eventY = (int) event.getY();
                         int deltaMoveY = (int) Math.abs(eventY - mLastDownEventY);
                         if (deltaMoveY <= mTouchSlop) {
+                            mChangeType = ChangeType.PRESS;
                             int selectorIndexOffset = (eventY / mSelectorElementSize)
                                     - mWheelMiddleItemIndex;
-                            if (selectorIndexOffset > 0) {
-                                changeValueByOne(true);
-                            } else if (selectorIndexOffset < 0) {
-                                changeValueByOne(false);
-                            } else {
+                            if (selectorIndexOffset == 0) {
                                 ensureScrollWheelAdjusted();
+                            } else {
+                                changeValueByOffset(selectorIndexOffset);
                             }
                         } else {
                             ensureScrollWheelAdjusted();
@@ -1805,6 +1811,15 @@ public class NumberPicker extends LinearLayout {
         mDisabledTextColor = disabledTextColor;
     }
 
+    /**
+     * Gets the change type.
+     *
+     * @return The change type.
+     */
+    public ChangeType getChangeType() {
+        return mChangeType;
+    }
+
     private float getFadingEdgeStrength(boolean isHorizontalMode) {
         return isHorizontalMode && mFadingEdgeEnabled ? mFadingEdgeStrength : 0;
     }
@@ -2173,6 +2188,21 @@ public class NumberPicker extends LinearLayout {
             moveToFinalScrollerPosition(mAdjustScroller);
         }
         smoothScroll(increment, 1);
+    }
+
+    /**
+     * Changes the current value by a position offset.
+     *
+     * @param positionOffset Position offset.
+     */
+    private void changeValueByOffset(int positionOffset) {
+        if (positionOffset == 0) {
+            return;
+        }
+        if (!moveToFinalScrollerPosition(mFlingScroller)) {
+            moveToFinalScrollerPosition(mAdjustScroller);
+        }
+        smoothScroll(positionOffset > 0, Math.abs(positionOffset));
     }
 
     /**
