@@ -1163,12 +1163,10 @@ public class NumberPicker extends LinearLayout {
                         if (deltaMoveY <= mTouchSlop) {
                             int selectorIndexOffset = (eventY / mSelectorElementSize)
                                     - mWheelMiddleItemIndex;
-                            if (selectorIndexOffset > 0) {
-                                changeValueByOne(true);
-                            } else if (selectorIndexOffset < 0) {
-                                changeValueByOne(false);
-                            } else {
+                            if (selectorIndexOffset == 0) {
                                 ensureScrollWheelAdjusted();
+                            } else {
+                                changeValueByOffset(selectorIndexOffset);
                             }
                         } else {
                             ensureScrollWheelAdjusted();
@@ -2173,6 +2171,21 @@ public class NumberPicker extends LinearLayout {
             moveToFinalScrollerPosition(mAdjustScroller);
         }
         smoothScroll(increment, 1);
+    }
+
+    /**
+     * Changes the current value by a position offset.
+     *
+     * @param positionOffset Position offset.
+     */
+    private void changeValueByOffset(int positionOffset) {
+        if (positionOffset == 0) {
+            return;
+        }
+        if (!moveToFinalScrollerPosition(mFlingScroller)) {
+            moveToFinalScrollerPosition(mAdjustScroller);
+        }
+        smoothScroll(positionOffset > 0, Math.abs(positionOffset));
     }
 
     /**
